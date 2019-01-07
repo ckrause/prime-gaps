@@ -18,24 +18,30 @@ void prime_gaps( int n )
     std::deque<int> updated_gaps;
 
     // make prime number copies of the list
-    if ( next_gaps.size() < n * 100 ) // <-- this check is only a performance optimization; not part of orginal algorithm
+    for ( int j = 0; j < prime; j++ )
     {
-      for ( int j = 0; j < prime; j++ )
+      std::copy( next_gaps.begin(), next_gaps.end(), std::back_inserter( updated_gaps ) );
+
+      // since the original algorithm has factorial space complexity
+      // we use the following check to stop generating more gaps when
+      // we get close to the target size; not part of orginal algorithm!
+      if ( updated_gaps.size() > 2 * n )
       {
-        std::copy( next_gaps.begin(), next_gaps.end(), std::back_inserter( updated_gaps ) );
+        break;
       }
+
     }
 
     // remove illegal gaps from the list
-    int sum = prime + gap;
+    int sum = gap;
     for ( int j = 0; j < (int) updated_gaps.size(); j++ )
     {
-      sum = (sum + updated_gaps[j]) % prime;
-      if ( sum == 0 )
+      sum += updated_gaps[j];
+      if ( sum % prime == 0 )
       {
-        sum = (sum + updated_gaps[j + 1]) % prime;
+        sum += updated_gaps[j + 1];
         updated_gaps[j] += updated_gaps[j + 1];
-        updated_gaps.erase( updated_gaps.begin() + j + 1, updated_gaps.begin() + j + 2 );
+        updated_gaps.erase( updated_gaps.begin() + j + 1 );
       }
     }
     next_gaps = updated_gaps;
@@ -47,5 +53,5 @@ void prime_gaps( int n )
 
 int main( int argc, char *argv[] )
 {
-  prime_gaps( 1000 );
+  prime_gaps( 10000 );
 }
