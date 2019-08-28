@@ -1,5 +1,8 @@
 #include <deque>
+#include <vector>
+#include <fstream>
 #include <iostream>
+#include <sstream>
 
 void prime_gaps( int n )
 {
@@ -24,7 +27,7 @@ void prime_gaps( int n )
 
       // since the original algorithm has factorial space complexity
       // we use the following check to stop generating more gaps when
-      // we get close to the target size; not part of orginal algorithm!
+      // we get close to the target size; not part of original algorithm!
       if ( updated_gaps.size() > 2 * n )
       {
         break;
@@ -51,7 +54,29 @@ void prime_gaps( int n )
   }
 }
 
+std::vector<int> load_ground_truth() {
+	std::ifstream bfile("b001223.txt");
+	if (!bfile.good())
+		throw std::runtime_error("b-file not found");
+	std::string l;
+	std::vector<int> seq;
+	int64_t expected_index = 1, index = 0, value = 0;
+	while (std::getline(bfile, l)) {
+		if (l.empty() || l[0] == '#')
+			continue;
+		std::stringstream ss(l);
+		ss >> index >> value;
+		if (index != expected_index || value < 1)
+			throw std::runtime_error("error in b-file");
+		seq.push_back(value);
+		++expected_index;
+	}
+	return seq;
+}
+
 int main( int argc, char *argv[] )
 {
-  prime_gaps( 10000 );
+	auto data = load_ground_truth();
+	std::cout << "found: " << data.at(10) << std::endl;
+//  prime_gaps( 10000 );
 }
