@@ -28,7 +28,7 @@ void next( state &s, int max )
     // since the original algorithm has factorial space complexity
     // we use the following check to stop generating more gaps when
     // we get close to the target size; not part of original algorithm!
-    if ( updated_gaps.size() > 2 * max )
+    if ( updated_gaps.size() > 2 * max + 100 )
     {
       break;
     }
@@ -80,6 +80,11 @@ int main( int argc, char *argv[] )
 
   int max_val = 10000;
   int max_print = 50;
+  if ( argc > 1 )
+  {
+    max_val = std::stoi( argv[1] );
+  }
+
   for ( int n = 0; n < max_val; n++ )
   {
     int p = s.prime;
@@ -87,7 +92,7 @@ int main( int argc, char *argv[] )
     for ( size_t i = 0; i < s.next_gaps.size(); i++ )
     {
       int g = s.next_gaps[i];
-      std::cout << "\033[0;" << ((g % 7) + 31) << "m" << g << "\033[0m";
+      std::cout << "\033[0;" << (((g / 2) % 7) + 31) << "m" << g << "\033[0m";
       if ( i + 1 < s.next_gaps.size() ) std::cout << ",";
       if ( i > max_print ) break;
     }
@@ -99,6 +104,6 @@ int main( int argc, char *argv[] )
     }
     next( s, max_val );
 
-    std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
+    std::this_thread::sleep_for( std::chrono::milliseconds( 500 / (n + 1) + 50 ) );
   }
 }
