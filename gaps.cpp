@@ -1,23 +1,22 @@
+#include <chrono>
 #include <deque>
 #include <vector>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <thread>
 
 struct state
 {
   int prime; // will store current prime number
-  int gap; // stores the gap to the next prime number
   std::deque<int> next_gaps; // list of next gap
 };
 
 void next( state &s, int max )
 {
-  s.prime += s.gap; // next prime is current prime plus gap
-
-  s.gap = s.next_gaps.front(); // next gap is first gap from list
+  int gap = s.next_gaps.front(); // next gap is first gap from list
   s.next_gaps.pop_front(); // move next gap from front...
-  s.next_gaps.push_back( s.gap ); // ...to end
+  s.next_gaps.push_back( gap ); // ...to end
 
   std::deque<int> updated_gaps;
 
@@ -37,7 +36,7 @@ void next( state &s, int max )
   }
 
   // remove illegal gaps from the list
-  int sum = s.gap;
+  int sum = gap;
   for ( int j = 0; j < (int) updated_gaps.size(); j++ )
   {
     sum += updated_gaps[j];
@@ -49,6 +48,7 @@ void next( state &s, int max )
     }
   }
   s.next_gaps = updated_gaps;
+  s.prime += gap; // next prime is current prime plus gap
 }
 
 std::vector<int> load_ground_truth()
@@ -75,18 +75,30 @@ int main( int argc, char *argv[] )
   auto ground_truth = load_ground_truth();
 
   state s;
-  s.prime = 1;
-  s.gap = 1;
+  s.prime = 2;
   s.next_gaps = { 1 };
 
-  int max = 10000;
-  for ( int i = 0; i < max; i++ )
+  int max_val = 10000;
+  int max_print = 50;
+  for ( int n = 0; n < max_val; n++ )
   {
-    next( s, max );
-    std::cout << "Step " << i << ": prime=" << s.prime << "; gap=" << s.gap << std::endl;
-    if ( s.gap != ground_truth.at( i ) )
+    int p = s.prime;
+    std::cout << "n=" << n << ": p=" << p << "; G=<";
+    for ( size_t i = 0; i < s.next_gaps.size(); i++ )
+    {
+      int g = s.next_gaps[i];
+      std::cout << "\033[0;" << ((g % 7) + 31) << "m" << g << "\033[0m";
+      if ( i + 1 < s.next_gaps.size() ) std::cout << ",";
+      if ( i > max_print ) break;
+    }
+    if ( s.next_gaps.size() > max_print ) std::cout << "...";
+    std::cout << ">" << std::endl;
+    if ( s.next_gaps.front() != ground_truth.at( n ) )
     {
       throw std::runtime_error( "unexpected gap!" );
     }
+    next( s, max_val );
+
+    std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
   }
 }
