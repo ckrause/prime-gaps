@@ -78,6 +78,20 @@ std::vector<int> load_ground_truth()
   return seq;
 }
 
+void print_list( std::deque<int> &l, int max_print )
+{
+  std::cout << "<";
+  for ( size_t i = 0; i < l.size(); i++ )
+  {
+    int g = l[i];
+    std::cout << "\033[0;" << (((g / 2) % 7) + 31) << "m" << g << "\033[0m";
+    if ( i + 1 < l.size() ) std::cout << ",";
+    if ( i > max_print ) break;
+  }
+  if ( l.size() > max_print ) std::cout << "...";
+  std::cout << ">";
+}
+
 int main( int argc, char *argv[] )
 {
   auto ground_truth = load_ground_truth();
@@ -96,17 +110,9 @@ int main( int argc, char *argv[] )
   for ( int n = 0; n < max_val; n++ )
   {
     int p = s.prime;
-    std::cout << "n=" << n << ": p=" << p << "; G=<";
-    for ( size_t i = 0; i < s.next_gaps.size(); i++ )
-    {
-      int g = s.next_gaps[i];
-      std::cout << "\033[0;" << (((g / 2) % 7) + 31) << "m" << g << "\033[0m";
-      if ( i + 1 < s.next_gaps.size() ) std::cout << ",";
-      if ( i > max_print ) break;
-    }
-    if ( s.next_gaps.size() > max_print ) std::cout << "...";
-    std::cout << ">" << std::endl;
-
+    std::cout << "n=" << n << ": p=" << p << "; G=";
+    print_list( s.next_gaps, max_print );
+    std::cout << std::endl;
     int f;
     for ( f = 0; f < s.next_gaps.size(); f++ )
       if ( s.next_gaps.at( f ) != 0 ) break;
