@@ -14,9 +14,13 @@ struct state
 
 void next( state &s, int max )
 {
-  int gap = s.next_gaps.front(); // next gap is first gap from list
-  s.next_gaps.pop_front(); // move next gap from front...
-  s.next_gaps.push_back( gap ); // ...to end
+  int gap = 0;
+  while ( gap == 0 )
+  {
+    gap = s.next_gaps.front(); // next gap is first gap from list
+    s.next_gaps.pop_front(); // move next gap from front...
+    s.next_gaps.push_back( gap ); // ...to end
+  }
 
   std::deque<int> updated_gaps;
 
@@ -28,7 +32,7 @@ void next( state &s, int max )
     // since the original algorithm has factorial space complexity
     // we use the following check to stop generating more gaps when
     // we get close to the target size; not part of original algorithm!
-    if ( updated_gaps.size() > 2 * max + 100 )
+    if ( updated_gaps.size() > 20 * max + 100 )
     {
       break;
     }
@@ -42,9 +46,13 @@ void next( state &s, int max )
     sum += updated_gaps[j];
     if ( sum % s.prime == 0 )
     {
-      sum += updated_gaps[j + 1];
-      updated_gaps[j] += updated_gaps[j + 1];
-      updated_gaps.erase( updated_gaps.begin() + j + 1 );
+      int k = j + 1;
+      while ( updated_gaps[k] == 0 )
+        k++;
+      sum += updated_gaps[k];
+      updated_gaps[j] += updated_gaps[k];
+      updated_gaps[k] = 0;
+      j = k;
     }
   }
   s.next_gaps = updated_gaps;
@@ -98,12 +106,16 @@ int main( int argc, char *argv[] )
     }
     if ( s.next_gaps.size() > max_print ) std::cout << "...";
     std::cout << ">" << std::endl;
-    if ( s.next_gaps.front() != ground_truth.at( n ) )
+
+    int f;
+    for ( f = 0; f < s.next_gaps.size(); f++ )
+      if ( s.next_gaps.at( f ) != 0 ) break;
+    if ( s.next_gaps[f] != ground_truth.at( n ) )
     {
       throw std::runtime_error( "unexpected gap!" );
     }
     next( s, max_val );
 
-    std::this_thread::sleep_for( std::chrono::milliseconds( 500 / (n + 1) + 50 ) );
+    // std::this_thread::sleep_for( std::chrono::milliseconds( 500 / (n + 1) + 50 ) );
   }
 }
