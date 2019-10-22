@@ -9,17 +9,31 @@
 struct state
 {
   int prime; // will store current prime number
-  std::deque<int> next_gaps; // list of next gap
+  std::deque<int> gaps; // list of next gap
 };
+
+void print_list( std::deque<int> &l, int max_print )
+{
+  std::cout << "<";
+  for ( size_t i = 0; i < l.size(); i++ )
+  {
+    int g = l[i];
+    std::cout << "\033[0;" << (((g / 2) % 7) + 31) << "m" << g << "\033[0m";
+    if ( i + 1 < l.size() ) std::cout << ",";
+    if ( i > max_print ) break;
+  }
+  if ( l.size() > max_print ) std::cout << "...";
+  std::cout << ">";
+}
 
 void next( state &s, int max )
 {
   int gap = 0;
   while ( gap == 0 )
   {
-    gap = s.next_gaps.front(); // next gap is first gap from list
-    s.next_gaps.pop_front(); // move next gap from front...
-    s.next_gaps.push_back( gap ); // ...to end
+    gap = s.gaps.front(); // next gap is first gap from list
+    s.gaps.pop_front(); // move next gap from front...
+    s.gaps.push_back( gap ); // ...to end
   }
 
   std::deque<int> updated_gaps;
@@ -27,7 +41,7 @@ void next( state &s, int max )
   // make prime number copies of the list
   for ( int j = 0; j < s.prime; j++ )
   {
-    std::copy( s.next_gaps.begin(), s.next_gaps.end(), std::back_inserter( updated_gaps ) );
+    std::copy( s.gaps.begin(), s.gaps.end(), std::back_inserter( updated_gaps ) );
 
     // since the original algorithm has factorial space complexity
     // we use the following check to stop generating more gaps when
@@ -55,7 +69,7 @@ void next( state &s, int max )
       j = k;
     }
   }
-  s.next_gaps = updated_gaps;
+  s.gaps = updated_gaps;
   s.prime += gap; // next prime is current prime plus gap
 }
 
@@ -78,27 +92,13 @@ std::vector<int> load_ground_truth()
   return seq;
 }
 
-void print_list( std::deque<int> &l, int max_print )
-{
-  std::cout << "<";
-  for ( size_t i = 0; i < l.size(); i++ )
-  {
-    int g = l[i];
-    std::cout << "\033[0;" << (((g / 2) % 7) + 31) << "m" << g << "\033[0m";
-    if ( i + 1 < l.size() ) std::cout << ",";
-    if ( i > max_print ) break;
-  }
-  if ( l.size() > max_print ) std::cout << "...";
-  std::cout << ">";
-}
-
 int main( int argc, char *argv[] )
 {
   auto ground_truth = load_ground_truth();
 
   state s;
   s.prime = 2;
-  s.next_gaps = { 1 };
+  s.gaps = { 1 };
 
   int max_val = 10000;
   int max_print = 50;
@@ -111,12 +111,12 @@ int main( int argc, char *argv[] )
   {
     int p = s.prime;
     std::cout << "n=" << n << ": p=" << p << "; G=";
-    print_list( s.next_gaps, max_print );
+    print_list( s.gaps, max_print );
     std::cout << std::endl;
     int f;
-    for ( f = 0; f < s.next_gaps.size(); f++ )
-      if ( s.next_gaps.at( f ) != 0 ) break;
-    if ( s.next_gaps[f] != ground_truth.at( n ) )
+    for ( f = 0; f < s.gaps.size(); f++ )
+      if ( s.gaps.at( f ) != 0 ) break;
+    if ( s.gaps[f] != ground_truth.at( n ) )
     {
       throw std::runtime_error( "unexpected gap!" );
     }
