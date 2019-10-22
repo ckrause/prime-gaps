@@ -26,6 +26,28 @@ void print_list( std::deque<int> &l, int max_print )
   std::cout << ">";
 }
 
+int max_dist( std::deque<int> &l, int v )
+{
+  int dist = -1;
+  int last = -1;
+  for ( size_t i = 0; i < l.size(); i++ )
+  {
+    if ( l[i] == v )
+    {
+      if ( last >= 0 )
+      {
+        int d = i - last;
+        if ( dist == -1 || d > dist )
+        {
+          dist = d;
+        }
+      }
+      last = i;
+    }
+  }
+  return dist;
+}
+
 void next( state &s, int max )
 {
   // checks
@@ -119,7 +141,7 @@ int main( int argc, char *argv[] )
   for ( int n = 0; n < max_val; n++ )
   {
     int p = s.prime;
-    std::cout << "n=" << n << ": p=" << p << "; G=";
+    std::cout << "n=" << n << ": p=" << p << "; d=" << max_dist( s.gaps, 2 ) << "; G=";
     print_list( s.gaps, max_print );
     std::cout << std::endl;
     int f;
