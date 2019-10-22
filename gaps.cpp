@@ -28,6 +28,15 @@ void print_list( std::deque<int> &l, int max_print )
 
 void next( state &s, int max )
 {
+  // checks
+  int sum = 0;
+  for ( int j = 0; j < (int) s.gaps.size(); j++ )
+  {
+    sum += s.gaps[j];
+    assert( sum <= j + 1 );
+  }
+
+  // rotate
   int gap = 0;
   while ( gap == 0 )
   {
@@ -46,7 +55,7 @@ void next( state &s, int max )
     // since the original algorithm has factorial space complexity
     // we use the following check to stop generating more gaps when
     // we get close to the target size; not part of original algorithm!
-    if ( updated_gaps.size() > 20 * max + 100 )
+    if ( updated_gaps.size() > 30 * max + 100 )
     {
       break;
     }
@@ -54,18 +63,18 @@ void next( state &s, int max )
   }
 
   // remove illegal gaps from the list
-  int sum = gap;
+  sum = gap;
   for ( int j = 0; j < (int) updated_gaps.size(); j++ )
   {
     sum += updated_gaps[j];
     if ( sum % s.prime == 0 )
     {
       int k = j + 1;
-      while ( updated_gaps[k] == 0 )
+      while ( k < updated_gaps.size() && updated_gaps[k] == 0 )
         k++;
       sum += updated_gaps[k];
-      updated_gaps[j] += updated_gaps[k];
-      updated_gaps[k] = 0;
+      updated_gaps[k] += updated_gaps[j];
+      updated_gaps[j] = 0;
       j = k;
     }
   }
