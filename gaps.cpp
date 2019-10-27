@@ -6,6 +6,8 @@
 #include <sstream>
 #include <thread>
 
+#define REMOVE_ZEROS true
+
 struct state
 {
   int prime; // will store current prime number
@@ -52,10 +54,13 @@ void next( state &s, int max )
 {
   // checks
   int sum = 0;
-  for ( int j = 0; j < (int) s.gaps.size(); j++ )
+  if ( ! REMOVE_ZEROS )
   {
-    sum += s.gaps[j];
-    assert( sum <= j + 1 );
+    for ( int j = 0; j < (int) s.gaps.size(); j++ )
+    {
+      sum += s.gaps[j];
+      assert( sum <= j + 1 );
+    }
   }
 
   // rotate
@@ -96,8 +101,15 @@ void next( state &s, int max )
         k++;
       sum += updated_gaps[k];
       updated_gaps[k] += updated_gaps[j];
-      updated_gaps[j] = 0;
-      j = k;
+      if ( REMOVE_ZEROS )
+      {
+        updated_gaps.erase( updated_gaps.begin() + j );
+      }
+      else
+      {
+        updated_gaps[j] = 0;
+        j = k;
+      }
     }
   }
   s.gaps = updated_gaps;
@@ -141,7 +153,7 @@ int main( int argc, char *argv[] )
   for ( int n = 0; n < max_val; n++ )
   {
     int p = s.prime;
-    std::cout << "n=" << n << ": p=" << p << "; d=" << max_dist( s.gaps, 2 ) << "; G=";
+    std::cout << "n=" << n << ": p=" << p << "; d>=" << max_dist( s.gaps, 2 ) << "; G=";
     print_list( s.gaps, max_print );
     std::cout << std::endl;
     int f;
@@ -153,6 +165,6 @@ int main( int argc, char *argv[] )
     }
     next( s, max_val );
 
-    // std::this_thread::sleep_for( std::chrono::milliseconds( 500 / (n + 1) + 50 ) );
+    std::this_thread::sleep_for( std::chrono::milliseconds( 500 / (n + 1) + 50 ) );
   }
 }
